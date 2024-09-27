@@ -25,21 +25,23 @@ class DisplayManager():
     def display_board(self):
         self.new_win = curses.newwin(self.board.height, self.board.width, 0, 0)
         self.new_win.border()
-        self.stdcr.refresh()
+        self.stdscr.refresh()
         
     def display_snake(self):
+        self.stdscr.erase()
+
         for i in range(self.snake.length):
             row = self.snake.location[i].row
             column = self.snake.location[i].column
 
             # 区分一下 head 和 tail, 否则用户会感到疑惑
-            if i == 0:
+            if i == self.snake.length - 1:
                 flag = ">"     
             else:
                 flag = "x"
             self.new_win.addstr(row, column, flag)
 
-        self.stdscr.refresh() 
+        self.stdscr.refresh()
 
     def read_user_direction(self, is_initial_status):
         # TODO: 改成等待 1s，用户如果没有输入就继续
@@ -47,7 +49,7 @@ class DisplayManager():
         direction = None
 
         while not direction:
-            key = new_win.getch()
+            key = self.new_win.getch()
             match key:
                 case curses.KEY_LEFT:
                     direction = "left"
@@ -62,3 +64,7 @@ class DisplayManager():
                 direction = None
                 
         return direction
+
+    def wait(self):
+        self.stdscr.nodelay(False)
+        self.new_win.getch()

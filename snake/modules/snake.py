@@ -4,7 +4,8 @@ class Snake():
         self.length = length
 
     def reset(self, center):
-        self.location = [center, center.right, center.right.right]
+        # the middle point should be at the center
+        self.location = [center.left(), center, center.right()]
         self.current_direction = None
 
     def move(self, direction):
@@ -57,6 +58,6 @@ class Snake():
             case "down":
                 self.head.row += 1
        
-       # The other points should follow its neighbor's last position 
-       for i in range(self.length - 2, 0):
+        # The other points should follow its neighbor's last position 
+        for i in range(self.length - 2, 0):
             self.location[i] = original_position[i + 1]

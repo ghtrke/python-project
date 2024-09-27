@@ -1,4 +1,4 @@
-from point import Point
+from modules.point import Point
 
 
 class Board():
