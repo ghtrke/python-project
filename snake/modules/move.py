@@ -1,6 +1,6 @@
 import curses
 import time
-
+import logging
 
 class DisplayManager():
     def __init__(self, stdscr, board, snake):
@@ -25,44 +25,69 @@ class DisplayManager():
     def display_board(self):
         self.new_win = curses.newwin(self.board.height, self.board.width, 0, 0)
         self.new_win.border()
+        self.new_win.keypad(True)
+        self.new_win.nodelay(True)
         self.stdscr.refresh()
         
     def display_snake(self):
-        self.stdscr.erase()
-
+        self.new_win.erase()
+        
         for i in range(self.snake.length):
             row = self.snake.location[i].row
             column = self.snake.location[i].column
 
             # 区分一下 head 和 tail, 否则用户会感到疑惑
             if i == self.snake.length - 1:
-                flag = ">"     
+                flag = "*"     
             else:
                 flag = "x"
             self.new_win.addstr(row, column, flag)
 
-        self.stdscr.refresh()
+        logging.info("display_snake")
+        # TODO: 为啥每次都要再设置一下 border
+        self.new_win.border()
+        self.new_win.refresh()
 
     def read_user_direction(self, is_initial_status):
-        # TODO: 改成等待 1s，用户如果没有输入就继续
-        time.sleep(1) 
         direction = None
 
-        while not direction:
-            key = self.new_win.getch()
-            match key:
-                case curses.KEY_LEFT:
-                    direction = "left"
-                case curses.KEY_RIGHT:
-                    direction = "right"
-                case curses.KEY_UP:
-                    direction = "up"
-                case curses.KEY_DOWN:
-                    direction = "down"
+        # if is_initial_status, must read a direction other than left
+        # else, just return the direction no matter what it is
+        if is_initial_status:
+            while not direction:
+                #key = self.stdscr.getch()
+                key = self.new_win.getch()
+                match key:
+                    case curses.KEY_LEFT:
+                        direction = "left"
+                    case curses.KEY_RIGHT:
+                        direction = "right"
+                    case curses.KEY_UP:
+                        direction = "up"
+                    case curses.KEY_DOWN:
+                        direction = "down"
 
-            if is_initial_status and direction == "left":
-                direction = None
-                
+                if direction == "left":
+                    direction = None
+        else:
+            key = self.new_win.getch()
+            direction = DisplayManager.convert_key_to_direction(key)
+
+        logging.info(f"direction={direction}")        
+        return direction
+    
+    @classmethod
+    def convert_key_to_direction(cls, key):
+        direction = None
+        match key:
+            case curses.KEY_LEFT:
+                direction = "left"
+            case curses.KEY_RIGHT:
+                direction = "right"
+            case curses.KEY_UP:
+                direction = "up"
+            case curses.KEY_DOWN:
+                direction = "down"
         return direction
 
     def wait(self):

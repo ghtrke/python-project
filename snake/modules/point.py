@@ -17,3 +17,9 @@ class Point:
 
     def down(self):
         return Point(self.row + 1, self.column)
+
+    def __str__(self):
+        return f"Point(row={self.row}, column={self.column})"
+
+    def __repr__(self):
+        return f"Point({self.row}, {self.column})"
